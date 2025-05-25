@@ -6,6 +6,8 @@ export default defineNuxtRouteMiddleware((to) => {
     return
   }
   
+  console.log("JOKOWI ", authStore.token);
+  
   // Redirect to login if no token exists
   if (!authStore.token) {
     return navigateTo('/login')

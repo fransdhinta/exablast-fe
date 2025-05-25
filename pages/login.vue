@@ -110,19 +110,22 @@ const password = ref('')
 const auth = useAuthStore()
 const router = useRouter()
 
-watch(() => auth.token, (token) => {
-  if (token) {
-    router.push('/') // Redirect to home or dashboard if already authenticated
+onMounted(() => {
+  if (auth.token) {
+    router.push('/admin') // Redirect to admin if already authenticated
   }
 })
 
 const login = async () => {
   try {
-    await auth.login(email.value, password.value)
-    router.push('/admin') // or dashboard
+    const success = await auth.login(email.value, password.value)
+    if (success) {
+      console.log('Login successful');
+      
+      router.push('/admin') // Redirect to admin dashboard
+    }
   } catch (e) {
     console.error('Login failed:', e)
-    alert('Invalid login')
   }
 }
 </script>

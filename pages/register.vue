@@ -128,7 +128,7 @@ const router = useRouter()
 
 const register = async () => {
   try {
-    await auth.register(email.value, name.value, password.value, "USER")
+    await auth.register(name.value, email.value, password.value, "USER")
     router.push('/login')
   } catch (e) {
     alert('Registration failed')
