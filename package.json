@@ -1,0 +1,22 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "0.11.0",
+    "@tailwindcss/vite": "^4.1.7",
+    "nuxt": "^3.17.4",
+    "pinia": "^3.0.2",
+    "tailwindcss": "^4.1.7",
+    "vue": "^3.5.14",
+    "vue-router": "^4.5.1"
+  },
+  "packageManager": "yarn@4.6.0+sha224.acd0786f07ffc6c933940eb65fc1d627131ddf5455bddcc295dc90fd"
+}
