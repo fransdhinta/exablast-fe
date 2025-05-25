@@ -46,7 +46,7 @@
           <h2 class="ml-3 text-lg font-medium text-gray-900">AI Question Generator</h2>
         </div>
         <p class="text-gray-600 mb-4">Generate questions with AI</p>
-        <NuxtLink to="/admin/generate-questions" class="text-indigo-600 hover:text-indigo-800 font-medium">
+        <NuxtLink to="/admin/questions/generate" class="text-indigo-600 hover:text-indigo-800 font-medium">
           Generate Questions →
         </NuxtLink>
       </div>
