@@ -19,7 +19,7 @@
               <h3 class="text-lg font-medium text-gray-900">{{ exam.title }}</h3>
               <div class="mt-1 flex items-center text-sm text-gray-500">
                 <div>Duration: {{ exam.duration }} minutes</div>
-                <div class="ml-6">Questions: {{ exam.questionCount || 0 }}</div>
+                <div class="ml-6">Questions: {{ exam.questions.length }}</div>
               </div>
             </div>
             <div class="flex">
@@ -46,6 +46,8 @@ const loading = ref(true)
 onMounted(async () => {
   try {
     const response = await api.get('/exams')
+    console.log('Fetched exams:', response.data);
+    
     exams.value = response.data || []
   } catch (error) {
     console.error('Error fetching exams:', error)

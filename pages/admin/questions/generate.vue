@@ -94,11 +94,11 @@
         <ul class="divide-y divide-gray-200">
           <li v-for="(question, index) in generatedQuestions" :key="index" class="px-4 py-5">
             <div class="mb-3">
-              <h3 class="text-lg font-medium text-gray-900">{{ question.questionText }}</h3>
+              <h3 class="text-lg font-medium text-gray-900">{{ question.text }}</h3>
             </div>
             
             <ul class="space-y-2 mb-4">
-              <li v-for="(option, optIndex) in question.answerOptions" :key="optIndex" 
+              <li v-for="(option, optIndex) in question.options" :key="optIndex" 
                   class="flex items-start"
                   :class="{ 'text-green-600 font-medium': option.isCorrect }">
                 <div class="flex-shrink-0 mr-2">
@@ -178,8 +178,10 @@ async function generateQuestions() {
   isGenerating.value = true
   
   try {
-    const response = await api.post('/questions/generate', generationForm.value)
-    generatedQuestions.value = response.data.map(q => ({ ...q, saved: false }))
+    const response = await api.post('/ai/generate-questions', generationForm.value)
+    console.log('Generated questions:', response);
+    
+    generatedQuestions.value = response.data.questions.map(q => ({ ...q, saved: false }))
   } catch (error) {
     console.error('Error generating questions:', error)
     alert('Failed to generate questions. Please try again.')
@@ -207,11 +209,29 @@ async function saveQuestion(question, index) {
 }
 
 async function saveAllQuestions() {
-  for (let i = 0; i < generatedQuestions.value.length; i++) {
-    if (!generatedQuestions.value[i].saved) {
-      await saveQuestion(generatedQuestions.value[i], i)
+    try {
+        const mappedQuestions = [...generatedQuestions.value].filter(q => !q.saved).map((q) => {
+            return {
+                text: q.text,
+                options: q.options
+            }
+        })
+        console.log(generatedQuestions.value.filter(q => !q.saved), 'questions to save');
+        
+        await api.post('/ai/save-questions', {
+            questions: mappedQuestions,
+            examId: generationForm.value.examId || null
+        })
+        generatedQuestions.value.map((q, i) => {
+            if (!q.saved) {
+                generatedQuestions.value[i].saved = true
+            }
+        })
+    } catch (error) {
+        console.error('Error saving question:', error)
+        alert('Failed to save question. Please try again.')
     }
-  }
+    
 }
 
 const allSaved = computed(() => {

@@ -17,14 +17,14 @@
           <div class="flex items-center justify-between">
             <div class="truncate">
               <div class="flex text-sm">
-                <p class="font-medium text-indigo-600 truncate">{{ question.questionText }}</p>
+                <p class="font-medium text-indigo-600 truncate">{{ question.text }}</p>
                 <p class="ml-1 flex-shrink-0 font-normal text-gray-500">
                   {{ question.isGenerated ? '(AI Generated)' : '' }}
                 </p>
               </div>
               <div class="mt-2 flex">
                 <div class="text-sm text-gray-500">
-                  {{ question.answerOptions?.length || 0 }} options
+                  {{ question.options?.length || 0 }} options
                 </div>
               </div>
             </div>

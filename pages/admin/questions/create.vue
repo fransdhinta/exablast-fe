@@ -16,10 +16,10 @@
         <form @submit.prevent="saveQuestion">
           <!-- Question Text -->
           <div class="mb-6">
-            <label for="questionText" class="block text-sm font-medium text-gray-700">Question Text</label>
+            <label for="text" class="block text-sm font-medium text-gray-700">Question Text</label>
             <textarea
-              id="questionText"
-              v-model="question.questionText"
+              id="text"
+              v-model="question.text"
               rows="3"
               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               placeholder="Enter your question here"
@@ -29,7 +29,7 @@
           
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Answer Options</label>
-            <div v-for="(option, index) in question.answerOptions" :key="index" class="flex items-start mb-3">
+            <div v-for="(option, index) in question.options" :key="index" class="flex items-start mb-3">
               <div class="mr-3 pt-1">
                 <input 
                   type="radio" 
@@ -53,7 +53,7 @@
                 type="button" 
                 @click="removeOption(index)" 
                 class="ml-3 text-red-600 hover:text-red-800 pt-2"
-                v-if="question.answerOptions.length > 2"
+                v-if="question.options.length > 2"
               >
                 Remove
               </button>
@@ -106,11 +106,10 @@ const api = useApi()
 
 const exams = ref([])
 const question = ref({
-  questionText: '',
-  type: 'mcq',
+  text: '',
   isGenerated: false,
   examId: '',
-  answerOptions: [
+  options: [
     { text: '', isCorrect: true },
     { text: '', isCorrect: false }
   ]
@@ -126,24 +125,24 @@ onMounted(async () => {
 })
 
 function addOption() {
-  question.value.answerOptions.push({
+  question.value.options.push({
     text: '',
     isCorrect: false
   })
 }
 
 function removeOption(index) {
-  const wasCorrect = question.value.answerOptions[index].isCorrect
-  question.value.answerOptions.splice(index, 1)
+  const wasCorrect = question.value.options[index].isCorrect
+  question.value.options.splice(index, 1)
   
   // If we removed the correct answer, set the first one as correct
-  if (wasCorrect && question.value.answerOptions.length > 0) {
-    question.value.answerOptions[0].isCorrect = true
+  if (wasCorrect && question.value.options.length > 0) {
+    question.value.options[0].isCorrect = true
   }
 }
 
 function setCorrectAnswer(index) {
-  question.value.answerOptions.forEach((option, i) => {
+  question.value.options.forEach((option, i) => {
     option.isCorrect = (i === index)
   })
 }
