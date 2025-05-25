@@ -27,7 +27,12 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token,
-    isAdmin: (state) => state.user?.role === 'admin',
+    isAdmin: (state) => {
+      // More verbose check with logging
+      const role = state.user?.role;
+      console.log('User role:', role);
+      return role === 'ADMIN';
+    },
     getUser: (state) => state.user
   },
 
@@ -39,19 +44,22 @@ export const useAuthStore = defineStore('auth', {
       try {
         const authApi = useAuthApi()
         const data = await authApi.login({ email, password })
-        console.log('Login response:', data);
+        console.log('Login API response:', data)
         
-        this.token = data.access_token
-        this.refresh_token = data.refresh_token
+        this.token = data.access_token || data.access_token
+        this.refresh_token = data.refresh_token || data.refresh_token
         this.user = data.user
         
         // Store tokens in localStorage safely (only client-side)
-        this.saveTokens(data.access_token, data.refresh_token)
+        this.saveTokens(this.token, this.refresh_token)
+        
+        // Make sure we have user data with role information
+        if (!this.user || !this.user.role) {
+          await this.fetchUser()
+        }
         
         return true
       } catch (error: any) {
-        console.log('Login error:', error);
-        
         this.error = error?.message || 'Login failed'
         return false
       } finally {

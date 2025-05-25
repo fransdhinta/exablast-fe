@@ -59,15 +59,15 @@
         <div class="flex flex-col md:flex-row justify-between">
           <div class="mb-4 md:mb-0">
             <p class="text-sm font-medium text-gray-500">Total Exams</p>
-            <p class="text-3xl font-bold text-gray-900">{{ stats.totalExams || 0 }}</p>
+            <p class="text-3xl font-bold text-gray-900">{{ stats.examCount || 0 }}</p>
           </div>
           <div class="mb-4 md:mb-0">
             <p class="text-sm font-medium text-gray-500">Total Questions</p>
-            <p class="text-3xl font-bold text-gray-900">{{ stats.totalQuestions || 0 }}</p>
+            <p class="text-3xl font-bold text-gray-900">{{ stats.questionCount || 0 }}</p>
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">AI Generated Questions</p>
-            <p class="text-3xl font-bold text-gray-900">{{ stats.aiGeneratedQuestions || 0 }}</p>
+            <p class="text-3xl font-bold text-gray-900">{{ stats.aiGeneratedQuestionCount || 0 }}</p>
           </div>
         </div>
       </div>
@@ -81,17 +81,21 @@ definePageMeta({
   middleware: ['auth']
 })
 
+const auth = useAuthStore()
+
 const api = useApi()
 const stats = ref({
-  totalExams: 0,
-  totalQuestions: 0,
-  aiGeneratedQuestions: 0
+  examCount: 0,
+  questionCount: 0,
+  aiGeneratedQuestionCount: 0
 })
 
 onMounted(async () => {
   try {
     // This is a placeholder - replace with your actual API endpoint
     const response = await api.get('/dashboard/stats')
+    console.log('Dashboard stats response:', response.data);
+    
     stats.value = response.data || stats.value
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)

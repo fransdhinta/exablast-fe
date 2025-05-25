@@ -107,25 +107,49 @@
 <script setup>
 const email = ref('')
 const password = ref('')
-const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
+
+let auth
 
 onMounted(() => {
-  if (auth.token) {
-    router.push('/admin') // Redirect to admin if already authenticated
+  try {
+    auth = useAuthStore()
+    
+    if (auth.token) {
+      // Use the redirect query parameter if available
+      const redirectPath = route.query.redirect || '/admin'
+      router.push(redirectPath.toString())
+    }
+  } catch (error) {
+    console.error('Failed to access auth store:', error)
   }
 })
 
 const login = async () => {
   try {
+    // Make sure we have access to the store
+    if (!auth) {
+      auth = useAuthStore()
+    }
+    
+    console.log('Attempting login...')
     const success = await auth.login(email.value, password.value)
+    console.log('Login result:', success)
+    
     if (success) {
-      console.log('Login successful');
+      console.log('Login successful, user:', auth.user)
+      console.log('Is admin?', auth.isAdmin)
       
-      router.push('/admin') // Redirect to admin dashboard
+      // Use the redirect query parameter if available
+      const redirectPath = route.query.redirect || '/admin'
+      console.log('Redirecting to:', redirectPath)
+      router.push(redirectPath.toString())
+    } else {
+      console.log('Login returned false, not redirecting')
     }
   } catch (e) {
-    console.error('Login failed:', e)
+    console.error('Login failed with error:', e)
   }
 }
 </script>
