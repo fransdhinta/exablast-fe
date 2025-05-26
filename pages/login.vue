@@ -29,6 +29,11 @@
       <div class="max-w-md w-full mx-auto">
         <h2 class="text-3xl font-bold text-gray-800 mb-2">Sign in</h2>
         <p class="text-gray-600 mb-8">Welcome back! Please enter your details.</p>
+
+        <!-- Error alert for failed login -->
+        <div v-if="loginError" class="mb-4 bg-red-50 border border-red-200 text-red-800 rounded-lg p-3">
+          {{ loginError }}
+        </div>
         
         <form @submit.prevent="login" class="space-y-5">
           <div>
@@ -85,8 +90,16 @@
             <button 
               type="submit" 
               class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150"
+              :disabled="isLoggingIn"
             >
-              Sign in
+              <span v-if="isLoggingIn">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing in...
+              </span>
+              <span v-else>Sign in</span>
             </button>
           </div>
         </form>
@@ -109,6 +122,8 @@ const email = ref('')
 const password = ref('')
 const router = useRouter()
 const route = useRoute()
+const loginError = ref('')
+const isLoggingIn = ref(false)
 
 let auth
 
@@ -118,7 +133,8 @@ onMounted(() => {
     
     if (auth.token) {
       // Use the redirect query parameter if available
-      const redirectPath = route.query.redirect || '/admin'
+      const redirectPath = route.query.redirect || 
+        (auth.isAdmin ? '/admin' : '/dashboard')
       router.push(redirectPath.toString())
     }
   } catch (error) {
@@ -128,6 +144,10 @@ onMounted(() => {
 
 const login = async () => {
   try {
+    // Clear previous errors
+    loginError.value = ''
+    isLoggingIn.value = true
+    
     // Make sure we have access to the store
     if (!auth) {
       auth = useAuthStore()
@@ -135,21 +155,33 @@ const login = async () => {
     
     console.log('Attempting login...')
     const success = await auth.login(email.value, password.value)
-    console.log('Login result:', success)
     
     if (success) {
-      console.log('Login successful, user:', auth.user)
-      console.log('Is admin?', auth.isAdmin)
-      
-      // Use the redirect query parameter if available
-      const redirectPath = route.query.redirect || '/admin'
-      console.log('Redirecting to:', redirectPath)
-      router.push(redirectPath.toString())
+      // Only redirect if we have both token AND user data
+      if (auth.token && auth.user) {
+        console.log('Login successful, user:', auth.user)
+        
+        // Redirect based on user role
+        const redirectPath = route.query.redirect || 
+          (auth.isAdmin ? '/admin' : '/dashboard')
+        console.log('Redirecting to:', redirectPath)
+        router.push(redirectPath.toString())
+      } else {
+        // We got success=true but no user data - this is suspicious
+        console.error('Login returned success but no user data')
+        loginError.value = 'Unable to retrieve your account information. Please try again.'
+        auth.clearTokens() // Clear any partial auth state
+      }
     } else {
-      console.log('Login returned false, not redirecting')
+      // Handle failed login
+      console.log('Login failed')
+      loginError.value = auth.error || 'Invalid email or password. Please try again.'
     }
   } catch (e) {
     console.error('Login failed with error:', e)
+    loginError.value = 'An error occurred during login. Please try again.'
+  } finally {
+    isLoggingIn.value = false
   }
 }
 </script>

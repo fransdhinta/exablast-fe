@@ -146,7 +146,7 @@ onMounted(async () => {
 async function updateProfile() {
   saving.value = true
   try {
-    await api.put('/user/profile', {
+    await api.patch('/users/profile', {
       name: user.value.name
     })
     
@@ -178,9 +178,9 @@ async function updatePassword() {
   
   changingPassword.value = true
   try {
-    await api.put('/user/password', {
+    await api.patch('/users/profile', {
       currentPassword: passwordForm.value.currentPassword,
-      newPassword: passwordForm.value.newPassword
+      password: passwordForm.value.newPassword
     })
     
     // Reset form
