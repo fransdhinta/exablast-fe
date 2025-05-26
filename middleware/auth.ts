@@ -18,6 +18,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // Check if authenticated
+  console.log("AUUUUUTH: ", auth.token)
   if (!auth.token) {
     return navigateTo({
       path: '/login',
@@ -30,28 +31,21 @@ export default defineNuxtRouteMiddleware(async (to) => {
     try {
       await auth.fetchUser()
       
-      // If we still don't have user data after fetch attempt
+      // If we can't get user data, token is likely invalid
       if (!auth.user) {
-        console.warn('Auth token present but unable to fetch user data')
-        // Only logout if we're not on login page already (prevents loops)
-        if (!to.path.startsWith('/login')) {
-          auth.logout()
-          return navigateTo({
-            path: '/login',
-            query: { redirect: to.fullPath }
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch user data:', error)
-      // Only logout if we're not on login page already
-      if (!to.path.startsWith('/login')) {
         auth.logout()
         return navigateTo({
           path: '/login',
           query: { redirect: to.fullPath }
         })
       }
+    } catch (error) {
+      console.error('Failed to fetch user data:', error)
+      auth.logout()
+      return navigateTo({
+        path: '/login',
+        query: { redirect: to.fullPath }
+      })
     }
   }
   

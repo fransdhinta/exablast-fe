@@ -46,37 +46,17 @@ export const useAuthStore = defineStore('auth', {
         const data = await authApi.login({ email, password })
         console.log('Login API response:', data)
         
-        // Check if we received the expected data
-        if (!data.access_token) {
-          this.error = 'Invalid response from server'
-          return false
-        }
+        this.token = data.access_token || data.access_token
+        this.refresh_token = data.refresh_token || data.refresh_token
+        this.user = data.user
         
-        this.token = data.access_token
-        this.refresh_token = data.refresh_token || null
-        
-        // Only save tokens after successful user data fetch
-        if (!data.user || !data.user.role) {
-          try {
-            const userData = await this.fetchUser()
-            if (!userData) {
-              this.error = 'Unable to retrieve user profile'
-              this.token = null
-              this.refresh_token = null
-              return false
-            }
-          } catch (fetchError) {
-            this.error = 'Failed to retrieve user profile'
-            this.token = null
-            this.refresh_token = null
-            return false
-          }
-        } else {
-          this.user = data.user
-        }
-        
-        // Store tokens only after we have confirmed valid user data
+        // Store tokens in localStorage safely (only client-side)
         this.saveTokens(this.token, this.refresh_token)
+        
+        // Make sure we have user data with role information
+        if (!this.user || !this.user.role) {
+          await this.fetchUser()
+        }
         
         return true
       } catch (error: any) {
@@ -175,8 +155,8 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Safe access to localStorage
-    saveTokens(token: string | null, refresh_token: string | null) {
-      if (process.client && token && refresh_token) {
+    saveTokens(token: string, refresh_token: string) {
+      if (process.client) {
         localStorage.setItem('token', token)
         localStorage.setItem('refresh_token', refresh_token)
       }
